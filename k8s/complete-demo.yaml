@@ -147,7 +147,7 @@ metadata:
   namespace: sock-shop
 spec:
   ports:
-    # the port that this service should serve on
+    # the port that this service should serve  on
   - port: 3306
     targetPort: 3306
   selector:
