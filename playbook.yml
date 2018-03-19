@@ -1,0 +1,89 @@
+---
+- hosts: all
+  tasks:
+
+  - name: Ensure Redis is installed.
+    apt:
+      name: "redis-server"
+      state: present
+
+  - replace:
+      path: /etc/redis/redis.conf
+      regexp: '6379'
+      replace: '1234'
+      backup: yes
+
+
+  - service:
+      name: redis-server
+      state: restarted
+
+  - name: Ensure Redis is running and enabled on boot.
+    service: "name=redis-server state=started enabled=yes"
+
+  - name: Ensure git is installed.
+    apt:
+      name: "git-all"
+      state: present
+  
+  - name: Ensure pip is installed.
+    apt:
+      name: "python-pip"
+      state: present
+
+  - git:
+      repo: 'https://github.com/ZoomRx/zoomrx-devops-challenge.git'
+      dest: /home/abilash_ksv/python-app
+    become: true
+    become_user: abilash_ksv
+
+  - name: Install  python requirements
+    pip: name={{item}} state=present
+    with_items:
+      - redis
+      - flask
+
+  - file:
+      path: /var/log/zoomrx
+      state: directory
+      mode: 0755
+
+  - name: Configure python app service
+    shell: |
+      sudo echo "start on filesystem
+      exec /usr/bin/python /home/abilash_ksv/python-app/app.py >> /var/log/zoomrx/app.log
+      respawn" > /etc/init/python-app.conf 
+      if [ !-f /etc/init.d/python-app ]
+      then
+        sudo ln -s /etc/init/python-app.conf /etc/init.d/python-app
+      fi
+    become: true
+
+
+  - service:
+      name: python-app
+      state: started
+
+
+  - name: Configure log rotation
+    shell: |
+      sudo cp /etc/cron.daily/logrotate   /etc/cron.hourly/ 
+      sudo echo "/var/log/zoomrx/*.log {
+        hourly
+        missingok
+        copytruncate
+        rotate 12
+        compress
+        notifempty
+      }" > /etc/logrotate.d/python-app
+     
+  - replace:
+      path: /etc/cron.hourly/logrotate
+      regexp: '/etc/logrotate.conf'
+      replace: '/etc/logrotate.d/python-app'
+      backup: yes
+
+  - name: Configure log rotation
+    shell: |
+      cd / && run-parts --report /etc/cron.hourly
+      test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.hourly )
