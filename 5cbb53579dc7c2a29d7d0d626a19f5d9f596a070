@@ -1,0 +1,1 @@
+{"jobID":"5dc29cc3-926f-bab7-bba8-6722cdfa0dcf","spec":{"type":"policy","cause":{"Message":"","User":"abilash \u003cabilash@datazoom.io\u003e"},"spec":{"sock-shop:deployment/front-end":{"add":{"automated":"true"},"remove":{}}}},"result":null}
