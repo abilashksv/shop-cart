@@ -1,0 +1,1 @@
+{"jobID":"c6c20b6d-6305-4237-c952-76558c1a5791","spec":{"type":"policy","cause":{"Message":"","User":"abilash \u003cabilash@datazoom.io\u003e"},"spec":{"sock-shop:deployment/carts":{"add":{},"remove":{"automated":"true"}}}},"result":null}
